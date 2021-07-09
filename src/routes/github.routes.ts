@@ -44,52 +44,18 @@ githubRouter.get('/all', async (request: Request, response: Response) => {
    */
   const { user, repository, since, until } = request.query;
 
-  let contributors
-  let commits
-  let formattedDateSince = new Date(String(since));
-  let formattedDateUntil = new Date(String(until));
-
-  let githubService = new GithubService(formattedDateSince, formattedDateUntil);
-
-  try {
-    contributors = await axios.get<Contributor[]>(`https://api.github.com/repos/${user}/${repository}/contributors`,
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.GITHUB_KEY}`
-        }
-      }
-    );
-  } catch (error) {
-    return response.json(error)
-  }
+  let githubService = new GithubService(since, until, user, repository);
 
   await githubService.createRangeTime();
 
-  let checkErrorRangeTime = await githubService.addContributorsToRangeTime(contributors);
+  let checkErrorRangeTime = await githubService.addContributorsToRangeTime();
 
   // Used to throw error in the requisition.
   if (checkErrorRangeTime instanceof AppError) {
     return response.json(checkErrorRangeTime);
   }
 
-  try {
-    commits = await axios.get<Commit[]>(`https://api.github.com/repos/${user}/${repository}/commits`,
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.GITHUB_KEY}`
-        },
-        params: {
-          // ISOString is need by the github docs.
-          since: formattedDateSince.toISOString(),
-          until: formattedDateUntil.toISOString()
-        }
-      }
-    );
-  } catch (error) {
-    return response.json(error)
-  }
-
-  let data = await githubService.addCommitsToContributorsByDate(commits);
+  let data = await githubService.addCommitsToContributorsByDate();
 
   // Used to throw error in the requisition.
   if (data instanceof AppError) {
