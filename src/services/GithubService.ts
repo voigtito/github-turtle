@@ -3,7 +3,6 @@ import Commit from "../interfaces/ICommit";
 import axios, { AxiosResponse } from "axios";
 import Contributor from "../interfaces/IContributor";
 import AppError from "../errors/AppError";
-import { UrlWithStringQuery } from "url";
 
 export class GithubService {
 
@@ -16,11 +15,16 @@ export class GithubService {
     private listOfDates?: ListOfDates[],
     private contributors?: AxiosResponse<Contributor[]>,
     private commits?: AxiosResponse<Commit[]>,
-  ) { 
+  ) {
     this.since = new Date(String(this.since));
     this.until = new Date(String(this.until));
   }
 
+  /**
+   * *Method to create the range time
+   * @description Method to create the range of time based on the since and until dates passed on the Class creation.
+   * @returns void
+   */
   public async createRangeTime() {
 
     // Create the time range.
@@ -28,8 +32,21 @@ export class GithubService {
     // Set the first date for the since data because the rangeOfTime has an open interval at the begining.
     this.listOfDates = [{ id: 0, date: this.since, contributors: [] }];
 
+    // Iterate over the time range array.
+    for (let i = 1; i <= this.range; i++) {
+      // Create new date to avoid referencing the date variable.
+      let refDate = new Date(this.since);
+      // Add the next date from the range.
+      this.listOfDates.push({ id: i, date: new Date(refDate.setDate(refDate.getDate() + i)), contributors: [] });
+    }
+
   }
 
+  /**
+   * *Method to related contributors to time range
+   * @description Method to add all the contributors for all dates created in the method createRangeTime()
+   * @returns void
+   */
   public async addContributorsToRangeTime() {
 
     if (!this.range) {
@@ -52,23 +69,27 @@ export class GithubService {
       return error
     }
 
-    // Iterate over the time range array.
-    for (let i = 1; i <= this.range; i++) {
-      // Create new date to avoid referencing the date variable.
-      let refDate = new Date(this.since);
-      // Add the next date from the range.
-      this.listOfDates.push({ id: i, date: new Date(refDate.setDate(refDate.getDate() + i)), contributors: [] });
-    }
     // Attribute the contributors to each date.
     for (let i = 0; i < this.listOfDates.length; i++) {
       // Add all contributors to each data because zero commit per day is also an indicator.
-      
-      this.contributors && this.contributors.data.map( contributor => {
-          this.listOfDates && this.listOfDates[i].contributors?.push({ id: contributor.id, avatar_url: contributor.avatar_url, login: contributor.login, contributionsByDate: 0, commits: [] });
+      this.contributors && this.contributors.data.map(contributor => {
+        this.listOfDates && this.listOfDates[i].contributors?.push(
+          { 
+            id: contributor.id, 
+            avatar_url: contributor.avatar_url, 
+            login: contributor.login, 
+            contributionsByDate: 0, 
+            commits: [] 
+          });
       });
     }
   }
 
+  /**
+   * *Method to add commits to te Contributors by date
+   * @description Method to add all the commits for its contributors according to the date related from the commit. It also count the commit by date according to user
+   * @returns ListOfDates[]
+   */
   public async addCommitsToContributorsByDate() {
 
     if (!this.listOfDates) {

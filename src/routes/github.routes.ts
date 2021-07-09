@@ -1,40 +1,16 @@
 import { Router, Request, Response } from 'express';
-import axios from 'axios';
 import { GithubService } from '../services/GithubService';
 import AppError from '../errors/AppError';
+import { celebrate, Segments, Joi } from 'celebrate';
 
 const githubRouter = Router();
 
-interface Commit {
-  commit: {
-    author: {
-      name: string;
-      email: string;
-      date: string | Date;
-    },
-    message: string;
-  }
-  author: {
-    login: string;
-    id: number;
-  },
-}
-
-interface Contributor {
-  id: number;
-  login: string;
-  avatar_url: string;
-  contributionsByDate: number;
-  commits: Commit[];
-}
-
-interface ListOfDates {
-  id: number;
-  date: Date;
-  contributors?: Contributor[];
-}
-
-githubRouter.get('/all', async (request: Request, response: Response) => {
+githubRouter.get('/all', celebrate({[Segments.QUERY]: {
+  since: Joi.required(),
+  until: Joi.required(),
+  user: Joi.required(),
+  repository: Joi.required(),
+}}) , async (request: Request, response: Response) => {
 
   /**
    * @user username from github
@@ -44,10 +20,13 @@ githubRouter.get('/all', async (request: Request, response: Response) => {
    */
   const { user, repository, since, until } = request.query;
 
+  // Instance the Github service class to call its methods.
   let githubService = new GithubService(since, until, user, repository);
 
+  // Method to create the time range.
   await githubService.createRangeTime();
 
+  // Method to add contributors to the range time.
   let checkErrorRangeTime = await githubService.addContributorsToRangeTime();
 
   // Used to throw error in the requisition.
@@ -55,6 +34,7 @@ githubRouter.get('/all', async (request: Request, response: Response) => {
     return response.json(checkErrorRangeTime);
   }
 
+  // Relate commits to its contributors according to date.
   let data = await githubService.addCommitsToContributorsByDate();
 
   // Used to throw error in the requisition.
