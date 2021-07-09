@@ -25,6 +25,10 @@
 1. Clone the repository from https://github.com/voigtito/github-turtle.git
 2. Run ```yarn``` or ```npm install```
 3. Run the server on ```yarn dev:server``` or ```npm run dev:server```
+4. Create and ```.env``` file with the followings variables:
+- ```GITHUB_KEY=EXAMPLE_TOKEN_GITHUB```
+5. The github token can be generated here: https://github.com/settings/tokens
+6. Create a token with the all the permissions for "repo" and use it for your ```GITHUB_KEY``` in ```.env``` file
 
 ### Insomnia or Postamn requests
 
@@ -36,12 +40,18 @@
 
 ### Architecture
 
-1. The architecture is divided in:
-  routes
-  interfaces
-  services
+1. modules
+2. routes
+3. interfaces
+4. services
 
+Modules -> The application has only one module but it was done to show how we divide the architecture on a bigger project. So each module has its own routes, services and interfaces. Making more easy to work with more people on the project and with tests.
 
+Routes -> The routes system is divided into the main file ```index.ts``` and module files like ```github.routes.ts```. This was made with the intention to get a more clean architecture to isolate each module route in the application.
+
+Interfaces -> The interfaces also remains to its own module. It was isolated to get more organized structure for the hole module and avoiding searching the interfaces in the services.
+
+Services -> The place where the business rules are written in code. It is separated in methods from a class but they can also be in separated files like CreateRepo.ts and UpdateRepo.ts for better practices in the unit tests.
 
 <!-- Badges -->
 
