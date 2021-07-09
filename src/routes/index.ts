@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import githubRoutes from './github.routes';
+import githubRoutes from '../modules/github/routes/github.routes';
 
 const routes = Router();
 

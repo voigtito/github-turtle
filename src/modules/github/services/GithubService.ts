@@ -2,7 +2,7 @@ import ListOfDates from "../interfaces/IListOfDates";
 import Commit from "../interfaces/ICommit";
 import axios, { AxiosResponse } from "axios";
 import Contributor from "../interfaces/IContributor";
-import AppError from "../errors/AppError";
+import AppError from "../../../errors/AppError";
 
 export class GithubService {
 

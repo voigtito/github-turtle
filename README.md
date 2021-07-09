@@ -37,8 +37,10 @@
 ### Architecture
 
 1. The architecture is divided in:
- - routes
- - services
+  routes
+  interfaces
+  services
+
 
 
 <!-- Badges -->

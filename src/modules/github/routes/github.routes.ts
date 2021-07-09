@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { GithubService } from '../services/GithubService';
-import AppError from '../errors/AppError';
+import AppError from '../../../errors/AppError';
 import { celebrate, Segments, Joi } from 'celebrate';
 
 const githubRouter = Router();
